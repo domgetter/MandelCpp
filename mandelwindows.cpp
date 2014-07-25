@@ -13,29 +13,50 @@ void SetWindowHandle(HWND hwnd)
     sHwnd=hwnd;
 }
 
-int mandelbrot(double c_real, double c_imag, int dwell){
+struct MandelOutput{
+  int iteration;
+  double degree;
+};
+
+MandelOutput mandelbrot(double c_real, double c_imag, int dwell){
 
   double z_real = c_real;
   double z_imag = c_imag;
   register double old_z_real;
+  MandelOutput output;
   int iteration;
+  double degree = 4.0;
 
   for(iteration = 0; iteration < dwell; ++iteration) {
-    if(z_real*z_real + z_imag*z_imag > 4) break;
+    if(z_real*z_real + z_imag*z_imag > 4){
+      degree = z_real*z_real + z_imag*z_imag;
+      break;
+    }
     old_z_real = z_real;
     z_real = z_real*z_real - z_imag*z_imag + c_real;
     z_imag = 2*old_z_real*z_imag + c_imag;
   }
-  return iteration;
+  output.iteration = iteration;
+  output.degree = degree;
+  return output;
 }
 void setPixels(COLORREF& color=redColor)
 {
     srand(time(NULL));
-    double x_lower_bound = -2.5;
-    double y_upper_bound = 2.1;
-    double scale = 2.2;
-    double x_upper_bound = x_lower_bound+3.0*scale;
-    double y_lower_bound = y_upper_bound-2.0*scale;
+    /*//fave little mandelbrot
+    double x_center = -1.2557;
+    double y_center = 0.381;
+    double scale = 200.0;
+    */
+    //default zoom out
+    double x_center = 0.0;
+    double y_center = 0.0;
+    double scale = 0.5;
+
+    double x_lower_bound = x_center-1.5/scale;
+    double y_upper_bound = y_center+1.0/scale;
+    double x_upper_bound = x_center+1.5/scale;
+    double y_lower_bound = y_center-1.0/scale;
     int x_resolution = 1200;
     int y_resolution = 800;
     double x_pos;
@@ -50,28 +71,33 @@ void setPixels(COLORREF& color=redColor)
     bufferBMP = CreateCompatibleBitmap(hdc, x_resolution, y_resolution);
     SelectObject(bufferDC, bufferBMP);
 
-    clock_t c_1 = clock();
+    //clock_t c_1 = clock();
 
     for(int y = 0; y < y_resolution; ++y){
       for(int x = 0; x < x_resolution; ++x){
         x_pos = x_lower_bound+(x)*(x_upper_bound - x_lower_bound)/(x_resolution);
         y_pos = y_upper_bound-(y)*(y_upper_bound - y_lower_bound)/(y_resolution);
+        int iteration;
+        double degree;
+        MandelOutput output = mandelbrot(x_pos, y_pos, dwell);
+        iteration = output.iteration;
+        degree = output.degree;
 
-        int iteration = mandelbrot(x_pos, y_pos, dwell);
         if(iteration == dwell){
           SetPixel(bufferDC, x, y, RGB(0, 0 , 0));
 
         } else {
           float blue = (((float)(iteration+1))/((float)dwell)) - 1.0;
           blue = 1.0-(pow(blue, 84));
-          SetPixel(bufferDC, x, y, RGB(0, (int)(255.0*blue) , 0));
+          //SetPixel(bufferDC, x, y, RGB((int)(255.0*blue), 0 , (int)(255.0*4.0/degree)));
+          SetPixel(bufferDC, x, y, RGB(255-(int)(255.0*16.0/(degree*degree)), 255-(int)(255.0*16.0/(degree*degree)) , 255-(int)(255.0*16.0/(degree*degree))));
 
         }
       }
     }
 
-    clock_t c_2 = clock();
-    printf("%f", (float)c_2 - (float)c_1);
+    //clock_t c_2 = clock();
+    //printf("%f", (float)c_2 - (float)c_1);
     BitBlt(hdc, 0, 0, x_resolution, y_resolution, bufferDC, 0, 0, SRCCOPY);
 
     EndPaint(sHwnd, &ps);
