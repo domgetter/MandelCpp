@@ -20,79 +20,16 @@ int mandelbrot(double c_real, double c_imag, int dwell){
   register double old_z_real;
   int iteration;
 
-  //clock_t c_1 = clock();
-  //int time = gettimeofday();
-
   for(iteration = 0; iteration < dwell; ++iteration) {
-    // z_n+1 = (z_n)^2 + c
-    // (a+bi)^2 == a^2 +2abi - b^2
-    // z_real = a^2 - b^2 + c_a;
-    // z_imag = 2ab + c_b;
     if(z_real*z_real + z_imag*z_imag > 4) break;
     old_z_real = z_real;
     z_real = z_real*z_real - z_imag*z_imag + c_real;
     z_imag = 2*old_z_real*z_imag + c_imag;
-    //printf("%f\n", z_real*z_real + z_imag*z_imag);
-    // printf("z_%d is %f + %fi\n", i, z_real, z_imag);
   }
-  //clock_t c_2 = clock();
-  //printf("%f+ %fi\n", (float)z_real, (float)z_imag);
-  //printf("%d\n", iteration);
   return iteration;
 }
-void createBitmapHeader(){
-  //BITMAPINFO bitmapInfo;
-}
-
 void setPixels(COLORREF& color=redColor)
 {
-  clock_t c_1 = clock();
-    PAINTSTRUCT ps;
-    HDC hdc = BeginPaint(sHwnd, &ps);
-    HDC bufferDC;
-    bufferDC = CreateCompatibleDC(NULL);
-
-    BITMAPINFO bufferInfo;
-    BITMAPINFOHEADER bufferInfoHeader;
-    bufferInfo.bmiHeader = bufferInfoHeader;
-    bufferInfoHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bufferInfoHeader.biWidth = 10;
-    bufferInfoHeader.biHeight = -10;
-    bufferInfoHeader.biPlanes = 1;
-    bufferInfoHeader.biBitCount = 24;
-    bufferInfoHeader.biSizeImage = 0;
-    bufferInfoHeader.biClrUsed = 0;
-    bufferInfoHeader.biClrImportant = 0;
-    unsigned char* bits;
-
-
-    HBITMAP bufferBMP = CreateDIBSection(bufferDC, &bufferInfo, DIB_RGB_COLORS, (void**)&bits, NULL, 0);
-
-    SelectObject(bufferDC, bufferBMP);
-
-    int b = 100;
-    printf("2");
-    printf("%d", sizeof(bits));
-    for(int i = 0; i < b; i += 3){
-      bits[i] = 0xAA;
-      bits[i+1] = 0x00;
-      bits[i+2] = 0xFF;
-    }
-    printf("3");
-    for(int i = 0; i < b; ++i){
-      printf("%d\n", (int)bits[i]);
-    }
-
-    //SetDIBits(bufferDC, bufferBMP, 0, 800, &(bitmapBytes[0]), &bufferInfo, DIB_RGB_COLORS);
-
-    BitBlt(hdc, 0, 0, 1200, 800, bufferDC, 0, 0, SRCCOPY);
-
-    EndPaint(sHwnd, &ps);
-    //clock_t c_2 = clock();
-    //printf("%f", (float)c_2 - (float)c_1);
-
-
-    /*
     srand(time(NULL));
     double x_lower_bound = -2.5;
     double y_upper_bound = 2.1;
@@ -111,9 +48,7 @@ void setPixels(COLORREF& color=redColor)
 
     bufferDC = CreateCompatibleDC(hdc);
     bufferBMP = CreateCompatibleBitmap(hdc, x_resolution, y_resolution);
-    int bufBMP_a[sizeof(bufferBMP)];
     SelectObject(bufferDC, bufferBMP);
-    SetDIBits(bufferDC, bufferBMP, 0, y_resolution, bufBMP_a);
 
     clock_t c_1 = clock();
 
@@ -140,7 +75,6 @@ void setPixels(COLORREF& color=redColor)
     BitBlt(hdc, 0, 0, x_resolution, y_resolution, bufferDC, 0, 0, SRCCOPY);
 
     EndPaint(sHwnd, &ps);
-    */
     return;
 }
 void drawStuff() {
@@ -191,8 +125,8 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
 // CreateWindow //
     HWND hwnd=CreateWindow(szAppName,"SetPixel example - programming-technique.blogspot.com",
                            WS_OVERLAPPEDWINDOW,
-                           0,
-                           0,
+                           10,
+                           10,
                            1200 + 16,
                            800 + 38,
                            NULL,
